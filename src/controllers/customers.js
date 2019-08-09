@@ -14,6 +14,9 @@ async function getAllCustomers(req, res) {
     
     const {conditionKey = 'email', conditionValue, pageRequested = 1, pageSize = 5, sortKey = 'email', sortValue = 1} = req.query;
     
+    console.log(conditionKey);
+    console.log(conditionValue);
+
     const documentCountBeforePagination = await Customer.countDocuments({[conditionKey]: new RegExp(conditionValue, 'i')});
     
     const documentsAfterPagination = await Customer.searchByFilters(conditionKey, conditionValue, pageRequested, pageSize, sortKey, sortValue);

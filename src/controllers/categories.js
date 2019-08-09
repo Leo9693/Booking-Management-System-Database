@@ -36,8 +36,8 @@ async function getCategoryById(req, res) {
 
 async function addCategory(req, res) {
     const {name, description} = req.body;
-    const existingName = await Category.findOne({name});
-    if (existingName) {
+    const existingCategory = await Category.findOne({name});
+    if (existingCategory) {
         return res.status(400).json('Category name has already existed');
     }
     const category = new Category({
@@ -54,6 +54,7 @@ async function addCategory(req, res) {
 async function updateCategory(req, res) {
     const {id} = req.params;
     const {name, description} = req.body;
+    
     const updatedCategory = await Category.findByIdAndUpdate(id, {name, description}, {new: true});
     if (!updatedCategory) {
         return res.status(404).json('updating category failed');
