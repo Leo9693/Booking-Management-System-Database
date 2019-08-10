@@ -1,17 +1,35 @@
 const mongoose = require('mongoose');
+const { DEFAULT_SEARCH_FIELD } = require('../utils/constants');
 
 const schema = new mongoose.Schema({
+    // use customerEmail instead of the id of customer as customerEmail is also unique.
     customerEmail: {
         type: String,
         ref: 'Customer',
         required: true,
         lowercase: true
     },
+    customerName: {
+        type: String,
+        ref: 'Customer',
+        required: true,
+        lowercase: true
+    },
+
+    // use businessEmail instead of the id of business as businessEmail is also unique.
     businessEmail: {
         type: String,
         ref: 'Business',
         lowercase: true
     },
+    businessName: {
+        type: String,
+        ref: 'Business',
+        required: true,
+        lowercase: true
+    },
+
+    // use categoryName instead of the id of category as categoryName is also unique.
     categoryName: {
         type: String,
         ref: 'Category',
@@ -19,28 +37,23 @@ const schema = new mongoose.Schema({
         lowercase: true
     },
     status: {
-        type:String,
-        required:true,
-        lowercase: true,
-        enum:['processing', 'accepted', 'finished'],
-        default:'processing'
+        type: String,
+        required: true,
+        enum: ['ongoing', 'finished'],
+        default:'ongoing'
     },
     jobEstimatedTime: {
         type:Date,
     },
-    jobFinishedTime: {
-        type:Date,
-    },
     jobLocation: {
-        type:String,
-        default:'',
+        type: String,
+        default: '',
         lowercase: true,
         required: true,
     },
     rate: {
         type:Number,      
         enum:[0, 1, 2, 3, 4, 5],
-        default:5,
         validate: (rate) => {
             if (rate < 0 || rate > 5) {
                 return false;
@@ -49,8 +62,7 @@ const schema = new mongoose.Schema({
         }
     },
     comment: {
-        type:String,              
-        default:''
+        type: String
     }
 },
 {
@@ -60,28 +72,29 @@ const schema = new mongoose.Schema({
     }
 });
 
-schema.statics.searchByFilters = async function (conditionKey, conditionValue, pageRequested, pageSize, sortKey, sortValue) {
+schema.statics.searchByFilters = async function (searchField, searchValue, pageRequested, pageSize, sortType, sortValue) {
     if (isNaN(pageSize) || parseInt(pageSize) <= 0) {
-        return 'pageSize is invalid';
+        return 'Page Size is invalid';
     }
+
     if (isNaN(pageRequested) || parseInt(pageRequested) <= 0) {
-        return 'pageRequested is invalid';
+        return 'Page Requested is invalid';
     }
+
     if (parseInt(sortValue) !== 1 && parseInt(sortValue) !== -1) {
-        return 'sortValue is invalid';
+        return 'Sort Value is invalid';
     }
-    let data;
-    if (!conditionKey) {
-        //此处不可以加await，加了await得到数组而不是Query对象，无法执行后面的.limit .sort等   
-        data = this.find(); 
+
+    let query;
+    if (!searchField || searchField === DEFAULT_SEARCH_FIELD) {    
+        query = this.find(); 
     } else {  
-        //此处不可以加await，加了await得到数组而不是Query对象，无法执行后面的.limit .sort等
-        data = this.find({[conditionKey]: new RegExp(conditionValue, 'i')});       
+        query = this.find({ [searchField]: new RegExp(searchValue, 'i') });       
     }
-    // 为何以下无论是否有await，data在return前都是query？
-    data.skip((parseInt(pageRequested)-1)*parseInt(pageSize))
+
+    const data = await query.skip((parseInt(pageRequested) - 1) * parseInt(pageSize))
         .limit(parseInt(pageSize))
-        .sort({[sortKey]: parseInt(sortValue)})
+        .sort({ [sortType]: parseInt(sortValue) })
         .exec();
     return data;
 }

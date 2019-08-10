@@ -7,17 +7,11 @@ const routeUsers = require('./routes/users');
 const routeAuth = require('./routes/auth');
 
 const router = express.Router();
-
 router.use('/customers', routeCustomers);
-
 router.use('/businesses', routeBusinesses);
-
 router.use('/orders', routeOrders);
-
 router.use('/categories', routeCategories);
-
 router.use('/users', routeUsers);
-
 router.use('/auth', routeAuth);
 
 module.exports = router;

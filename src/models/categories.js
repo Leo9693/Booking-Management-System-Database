@@ -1,14 +1,15 @@
 const mongoose = require('mongoose');
+const { DEFAULT_SEARCH_FIELD } = require('../utils/constants');
 
 const schema = new mongoose.Schema({
     name: {
-        type:String,
-        required:true,
+        type: String,
+        required: true,
         lowercase: true,      
     },
     description: {
-        type:String,       
-        default:''
+        type: String,
+        required: true,
     },
     businesses: [
         {
@@ -24,13 +25,13 @@ const schema = new mongoose.Schema({
     ] 
 },
 {
-    timestamps: true,
+    // timestamps: true,
     toJSON: {
         virtuals: true
     }
 });
 
-schema.statics.searchByFilters = async function (conditionKey, conditionValue, pageRequested, pageSize, sortKey, sortValue) {
+schema.statics.searchByFilters = async function (searchField, searchValue, pageRequested, pageSize, sortType, sortValue) {
     if (isNaN(pageSize) || parseInt(pageSize) <= 0) {
         return 'pageSize is invalid';
     }
@@ -40,12 +41,19 @@ schema.statics.searchByFilters = async function (conditionKey, conditionValue, p
     if (parseInt(sortValue) !== 1 && parseInt(sortValue) !== -1) {
         return 'sortValue is invalid';
     }
-    const data = await this.find({[conditionKey]: new RegExp(conditionValue, 'i')})
-        .skip((parseInt(pageRequested)-1)*parseInt(pageSize))
+
+    let query;
+    if (!searchField || searchField === DEFAULT_SEARCH_FIELD) {    
+        query = this.find(); 
+    } else {  
+        query = this.find({ [searchField]: new RegExp(searchValue, 'i') });       
+    }
+
+    const data = await query.skip((parseInt(pageRequested) - 1) * parseInt(pageSize))
         .limit(parseInt(pageSize))
-        .sort({[sortKey]: parseInt(sortValue)})
+        .sort({ [sortType]: parseInt(sortValue) })
         .exec();
-    
+       
     return data;
 }
 
