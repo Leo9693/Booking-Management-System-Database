@@ -86,10 +86,10 @@ async function deleteUser(req, res, next) {
 }
 
 async function loginUser(req, res) {
-    const { email, password } = req.body;
-    const existingUser = await User.findOne({ email });
+    const { name, password } = req.body;
+    const existingUser = await User.findOne({ name });
     if (!existingUser) {
-        return res.status(401).json('Invalid user email');
+        return res.status(401).json('Invalid user name');
     }
 
     const isValidPassword = await bcrypt.compareSync(password, existingUser.hashPassword);
@@ -97,7 +97,7 @@ async function loginUser(req, res) {
         return res.status(401).json('Invalid password');
     }
 
-    const { name } = existingUser;
+    const { email } = existingUser;
     const token = generateToken(existingUser._id);
     const userInfo = { name, email, token };
     const data = { userInfo };
