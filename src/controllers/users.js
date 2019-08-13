@@ -23,7 +23,12 @@ async function getUserById (req, res) {
 
 async function addUser (req, res) {
     const { name, email, password } = req.body;
-    const existingUser = await User.findOne({ email });
+    let existingUser = await User.findOne({ name });
+    if (existingUser) {
+        return res.status(400).json('Name has already been used');
+    }
+
+    existingUser = await User.findOne({ email });
     if (existingUser) {
         return res.status(400).json('Email has already been used');
     }
@@ -42,9 +47,14 @@ async function addUser (req, res) {
 async function updateUser(req, res) {
     const { id } = req.params;
     const { name, email, password } = req.body;
-    const existingUser = await User.findById(id);
-    if (email !== existingUser.email) {
-        return res.status(400).json("User's email can not be changed");
+    let existingUser = await User.findOne({ name });
+    if (existingUser) {
+        return res.status(400).json('Name has already been used');
+    }
+    
+    existingUser = await User.findOne({ email });
+    if (existingUser) {
+        return res.status(400).json('Email has already been used');
     }
 
     const hashPassword = bcrypt.hashSync(password, 10);
