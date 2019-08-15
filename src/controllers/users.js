@@ -47,7 +47,7 @@ async function addUser (req, res) {
 
 async function updateUser(req, res) {
     const { id } = req.params;
-    const { name, email, password } = req.body;
+    const { name, email } = req.body;
     const existingUser = await User.findById(id);
     if (name !== existingUser.name) {
         const checkingUserByName = await User.findOne({ name });
@@ -63,10 +63,10 @@ async function updateUser(req, res) {
         }
     }
 
-    const hashPassword = bcrypt.hashSync(password, 10);
+    // const hashPassword = bcrypt.hashSync(password, 10);
     const updatedUser = await User.findByIdAndUpdate(
         id, 
-        { name, email, hashPassword },
+        { name, email },
         { runValidators: true, new: true }
     );
     if (!updatedUser) {
