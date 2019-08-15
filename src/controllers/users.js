@@ -4,7 +4,7 @@ const User = require('../models/users');
 const { generateToken } = require('../utils/jwt');
 
 
-async function getAllUsers (req, res) {
+async function getAllUsers(req, res) {
     const allUsers = await User.find().exec();
     if (!allUsers) {
         return res.status(404).json('Users are not found');
@@ -12,7 +12,7 @@ async function getAllUsers (req, res) {
     return res.json(allUsers);
 }
 
-async function getUserById (req, res) {
+async function getUserById(req, res) {
     const { id } = req.params;
     const user = await User.findById(id);
     if (!user) {
@@ -21,13 +21,13 @@ async function getUserById (req, res) {
     return res.json(user);
 }
 
-async function addUser (req, res) {
+async function addUser(req, res) {
     const { name, email, password } = req.body;
     let existingUser = await User.findOne({ name });
     if (existingUser) {
         return res.status(400).json('Name has already been used');
     }
-    
+
     existingUser = await User.findOne({ email });
     if (existingUser) {
         return res.status(400).json('Email has already been used');
@@ -65,7 +65,7 @@ async function updateUser(req, res) {
 
     // const hashPassword = bcrypt.hashSync(password, 10);
     const updatedUser = await User.findByIdAndUpdate(
-        id, 
+        id,
         { name, email },
         { runValidators: true, new: true }
     );
@@ -73,11 +73,35 @@ async function updateUser(req, res) {
         return res.status(404).json('updating user failed');
     }
 
-    return res.json(updatedUser); 
+    return res.json(updatedUser);
+}
+
+async function updatePassword(req, res) {
+    const { id } = req.params;
+    const { originalPassword, newPassword } = req.body;
+    console.log(originalPassword);
+    console.log(newPassword);
+    const existingUser = await User.findById(id);
+    const isValidPassword = await bcrypt.compareSync(originalPassword, existingUser.hashPassword);
+    if (!isValidPassword) {
+        return res.status(401).json('Invalid original password');
+    }
+
+    const hashPassword = bcrypt.hashSync(newPassword, 10);
+    const updatedPassword = await User.findByIdAndUpdate(
+        id,
+        { hashPassword },
+        { runValidators: true, new: true }
+    );
+    if (!updatedPassword) {
+        return res.status(404).json('updating password failed');
+    }
+
+    return res.json(updatedPassword);
 }
 
 async function deleteUser(req, res, next) {
-    const {id} = req.params;
+    const { id } = req.params;
     const deletedUser = await User.findByIdAndDelete(id);
     if (!deletedUser) {
         return res.status(404).json('Deleting user failed');
@@ -111,6 +135,7 @@ module.exports = {
     getUserById,
     addUser,
     updateUser,
+    updatePassword,
     deleteUser,
     loginUser
 };
