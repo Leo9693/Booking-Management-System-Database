@@ -40,8 +40,9 @@ async function addUser (req, res) {
     }
 
     await user.save();
-    const token = generateToken(user._id);
-    return res.json({ name, email, token });
+    const { _id } = user;
+    const token = generateToken(_id);
+    return res.json({ _id, name, email, token });
 }
 
 async function updateUser(req, res) {
@@ -98,8 +99,9 @@ async function loginUser(req, res) {
     }
 
     const { email } = existingUser;
-    const token = generateToken(existingUser._id);
-    const userInfo = { name, email, token };
+    const { _id } = existingUser;
+    const token = generateToken(_id);
+    const userInfo = { _id, name, email, token };
     const data = { userInfo };
     return res.json(data);
 }
