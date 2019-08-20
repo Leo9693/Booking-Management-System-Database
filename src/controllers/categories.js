@@ -9,7 +9,7 @@ const {
 } = require('../utils/constants')
 
 async function getAllCategories(req, res) {
-    const { 
+    const {
         searchField = DEFAULT_SEARCH_FIELD,
         searchValue,
         pageRequested = DEFAULT_PAGE_REQUESTED,
@@ -22,7 +22,7 @@ async function getAllCategories(req, res) {
     let documentCount;
     if (!searchField || searchField === DEFAULT_SEARCH_FIELD) {
         documentCount = await Category.countDocuments();
-    } else {  
+    } else {
         documentCount = await Category.countDocuments({
             [searchField]: new RegExp(searchValue, 'i')
         });
@@ -34,7 +34,7 @@ async function getAllCategories(req, res) {
         return res.status(404).json('Categories are not found');
     }
 
-    if (typeof(documents) === 'string') {
+    if (typeof (documents) === 'string') {
         return res.status(500).json(documents);
     }
 
@@ -75,8 +75,8 @@ async function addCategory(req, res) {
 async function updateCategory(req, res) {
     const { id } = req.params;
     const { name, description } = req.body;
-    
-    const updatedCategory = await Category.findByIdAndUpdate(id, { name, description }, { new: true });
+
+    const updatedCategory = await Category.findByIdAndUpdate(id, { name, description }, { runValidators: true, new: true });
     if (!updatedCategory) {
         return res.status(404).json('updating category failed');
     }
@@ -101,7 +101,7 @@ async function addBusinesstoCategory(req, res) {
     const { categoryId, businessId } = req.params;
     const existingCategory = await Category.findById(categoryId);
     const existingBusiness = await Business.findById(businessId);
-    if (!existingCategory || !existingBusiness) {   
+    if (!existingCategory || !existingBusiness) {
         return res.status(404).json('Category or business is not found');
     }
 
@@ -116,7 +116,7 @@ async function deleteBusinessFromCategory(req, res) {
     const { categoryId, businessId } = req.params;
     const existingCategory = await Category.findById(categoryId);
     const existingBusiness = await Business.findById(businessId);
-    if (!existingCategory || !existingBusiness) {   
+    if (!existingCategory || !existingBusiness) {
         return res.status(404).json('Category or business is not found');
     }
     existingCategory.businesses.pull(existingBusiness._id);
@@ -124,7 +124,7 @@ async function deleteBusinessFromCategory(req, res) {
     existingBusiness.categories.pull(existingCategory._id);
     await existingBusiness.save();
     return res.json(existingCategory);
-} 
+}
 
 module.exports = {
     getAllCategories,
