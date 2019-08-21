@@ -9,9 +9,9 @@ const schema = new mongoose.Schema({
         lowercase: true
     },
     ABN: {
-        type: String,  
+        type: String,
         required: true,
-        default: ''      
+        default: ''
     },
     email: {
         type: String,
@@ -26,11 +26,11 @@ const schema = new mongoose.Schema({
         type: String,
         required: true
     },
-    streeAddress: {
+    streetAddress: {
         type: String,
         required: true,
         lowercase: true,
-        default:''
+        default: ''
     },
     postcode: {
         type: String,
@@ -39,10 +39,10 @@ const schema = new mongoose.Schema({
     state: {
         type: String,
         required: true,
-        enum: ['NSW', 'VIC', 'QLD', 'WA', 'TAS','SA','ACT', 'NT'], 
+        enum: ['NSW', 'VIC', 'QLD', 'WA', 'TAS', 'SA', 'ACT', 'NT'],
     },
     rate: {
-        type: Number,        
+        type: Number,
     },
     categories: [
         {
@@ -57,12 +57,12 @@ const schema = new mongoose.Schema({
         }
     ]
 },
-{
-    timestamps: true,
-    toJSON: {
-        virtuals: true
-    }
-});
+    {
+        timestamps: true,
+        toJSON: {
+            virtuals: true
+        }
+    });
 
 schema.statics.searchByFilters = async function (searchField, searchValue, pageRequested, pageSize, sortType, sortValue) {
     if (isNaN(pageSize) || parseInt(pageSize) <= 0) {
@@ -76,17 +76,17 @@ schema.statics.searchByFilters = async function (searchField, searchValue, pageR
     }
 
     let query;
-    if (!searchField || searchField === DEFAULT_SEARCH_FIELD) {    
-        query = this.find(); 
-    } else {  
-        query = this.find({ [searchField]: new RegExp(searchValue, 'i') });       
+    if (!searchField || searchField === DEFAULT_SEARCH_FIELD) {
+        query = this.find();
+    } else {
+        query = this.find({ [searchField]: new RegExp(searchValue, 'i') });
     }
 
     const data = await query.skip((parseInt(pageRequested) - 1) * parseInt(pageSize))
         .limit(parseInt(pageSize))
         .sort({ [sortType]: parseInt(sortValue) })
         .exec();
-    
+
     return data;
 }
 

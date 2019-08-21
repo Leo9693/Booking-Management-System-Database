@@ -5,12 +5,14 @@ const schema = new mongoose.Schema({
     name: {
         type: String,
         required: true,
-        lowercase: true
+        lowercase: true,
+        unique: true,
     },
     email: {
         type: String,
         required: true,
         lowercase: true,
+        unique: true,
         validate: {
             validator: email => !joi.validate(email, joi.string().email()).error,
             msg: 'Invalid email format'

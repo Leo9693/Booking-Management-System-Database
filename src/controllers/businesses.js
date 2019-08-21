@@ -9,7 +9,7 @@ const {
 } = require('../utils/constants')
 
 async function getAllBusinesses(req, res) {
-    const { 
+    const {
         searchField = DEFAULT_SEARCH_FIELD,
         searchValue,
         pageRequested = DEFAULT_PAGE_REQUESTED,
@@ -22,7 +22,7 @@ async function getAllBusinesses(req, res) {
     let documentCount;
     if (!searchField || searchField === DEFAULT_SEARCH_FIELD) {
         documentCount = await Business.countDocuments();
-    } else {  
+    } else {
         documentCount = await Business.countDocuments({
             [searchField]: new RegExp(searchValue, 'i')
         });
@@ -33,11 +33,11 @@ async function getAllBusinesses(req, res) {
         return res.status(404).json('Businesses are not found');
     }
 
-    if (typeof(documents) === 'string') {
+    if (typeof (documents) === 'string') {
         return res.status(500).json(documents);
     }
 
-    return res.json({documentCount, documents});
+    return res.json({ documentCount, documents });
 }
 
 async function getBusinessById(req, res) {
@@ -53,7 +53,7 @@ async function getBusinessById(req, res) {
 }
 
 async function addBusiness(req, res) {
-    const { name, ABN, email, phone, streeAddress, postcode, state, rate } = req.body;
+    const { name, ABN, email, phone, streetAddress, postcode, state, rate } = req.body;
     const existingEmail = await Business.findOne({ email });
     if (existingEmail) {
         return res.status(400).json('Email has already existed');
@@ -63,7 +63,7 @@ async function addBusiness(req, res) {
         ABN,
         email,
         phone,
-        streeAddress,
+        streetAddress,
         postcode,
         state,
         rate
@@ -78,9 +78,9 @@ async function addBusiness(req, res) {
 
 async function updateBusiness(req, res) {
     const { id } = req.params;
-    const { name, ABN, email, phone, streeAddress, postcode, state, rate } = req.body;
+    const { name, ABN, email, phone, streetAddress, postcode, state, rate } = req.body;
     const updatedBusiness = await Business.findByIdAndUpdate(id,
-        { name, ABN, email, phone, streeAddress, postcode, state, rate },
+        { name, ABN, email, phone, streetAddress, postcode, state, rate },
         { runValidators: true, new: true });
     if (!updatedBusiness) {
         return res.status(404).json('Updating business failed');
@@ -100,14 +100,14 @@ async function deleteBusinessById(req, res) {
         { _id: { $in: deletedBusiness.categories } },
         { $pull: { businesses: deletedBusiness._id } }
     );
-    return res.json(deletedBusiness); 
+    return res.json(deletedBusiness);
 }
 
 async function addCategorytoBusiness(req, res) {
     const { businessId, categoryId } = req.params;
     const existingBusiness = await Business.findById(businessId);
     const existingCategory = await Category.findById(categoryId);
-    if (!existingBusiness || !existingCategory) {   
+    if (!existingBusiness || !existingCategory) {
         return res.status(404).json('Business or category is not found');
     }
 
@@ -122,7 +122,7 @@ async function deleteCategoryFromBusiness(req, res) {
     const { businessId, categoryId } = req.params;
     const existingBusiness = await Business.findById(businessId);
     const existingCategory = await Category.findById(categoryId);
-    if (!existingBusiness || !existingCategory) {   
+    if (!existingBusiness || !existingCategory) {
         return res.status(404).json('Business or category is not found');
     }
 
@@ -131,7 +131,7 @@ async function deleteCategoryFromBusiness(req, res) {
     existingCategory.businesses.pull(existingBusiness._id);
     await existingCategory.save();
     return res.json(existingBusiness);
-} 
+}
 
 module.exports = {
     getAllBusinesses,
