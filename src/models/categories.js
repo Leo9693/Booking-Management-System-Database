@@ -5,11 +5,13 @@ const schema = new mongoose.Schema({
     name: {
         type: String,
         required: true,
-        lowercase: true,      
+        lowercase: true,
+        unique: true,
     },
     description: {
         type: String,
         required: true,
+        unique: true,
     },
     businesses: [
         {
@@ -22,14 +24,14 @@ const schema = new mongoose.Schema({
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Order',
         }
-    ] 
+    ]
 },
-{
-    // timestamps: true,
-    toJSON: {
-        virtuals: true
-    }
-});
+    {
+        // timestamps: true,
+        toJSON: {
+            virtuals: true
+        }
+    });
 
 schema.statics.searchByFilters = async function (searchField, searchValue, pageRequested, pageSize, sortType, sortValue) {
     if (isNaN(pageSize) || parseInt(pageSize) <= 0) {
@@ -43,17 +45,17 @@ schema.statics.searchByFilters = async function (searchField, searchValue, pageR
     }
 
     let query;
-    if (!searchField || searchField === DEFAULT_SEARCH_FIELD) {    
-        query = this.find(); 
-    } else {  
-        query = this.find({ [searchField]: new RegExp(searchValue, 'i') });       
+    if (!searchField || searchField === DEFAULT_SEARCH_FIELD) {
+        query = this.find();
+    } else {
+        query = this.find({ [searchField]: new RegExp(searchValue, 'i') });
     }
 
     const data = await query.skip((parseInt(pageRequested) - 1) * parseInt(pageSize))
         .limit(parseInt(pageSize))
         .sort({ [sortType]: parseInt(sortValue) })
         .exec();
-       
+
     return data;
 }
 

@@ -6,17 +6,20 @@ const schema = new mongoose.Schema({
     name: {
         type: String,
         required: true,
-        lowercase: true
+        lowercase: true,
+        unique: true,
     },
     ABN: {
         type: String,
         required: true,
+        unique: true,
         default: ''
     },
     email: {
         type: String,
         required: true,
         lowercase: true,
+        unique: true,
         validate: {
             validator: email => !joi.validate(email, joi.string().email()).error,
             msg: 'Invalid email format'
@@ -24,7 +27,8 @@ const schema = new mongoose.Schema({
     },
     phone: {
         type: String,
-        required: true
+        required: true,
+        unique: true,
     },
     streetAddress: {
         type: String,
