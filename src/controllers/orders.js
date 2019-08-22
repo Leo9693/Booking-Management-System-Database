@@ -47,9 +47,9 @@ async function getAllOrders(req, res) {
 async function getOrderById(req, res) {
     const { id } = req.params;
     const order = await Order.findById(id)
-    // .populate('customer', 'email phone')
-    // .populate('business', 'email phone postcode')
-    // .populate('category', 'name')
+        .populate('customer', 'name email phone')
+        .populate('business', 'name email phone postcode')
+        .populate('category', 'name')
     if (!order) {
         return res.status(404).json('Order is not found');
     }
@@ -74,18 +74,18 @@ async function addOrder(req, res) {
         return res.status(500).json('Adding order failed');
     }
 
-    const existingCustomer = await Customer.findOne({ name: customer });
+    const existingCustomer = await Customer.findById(customer);
     if (!existingCustomer) {
         return res.status(404).json(`Customer is not found`);
     }
 
-    const existingCategory = await Category.findOne({ name: category });
+    const existingCategory = await Category.findById(category);
     if (!existingCategory) {
         return res.status(404).json(`Category is not found`);
     }
 
     if (business) {
-        const existingBusiness = await Business.findOne({ name: business });
+        const existingBusiness = await Business.findById(business);
         if (!existingBusiness) {
             return res.status(404).json(`Business is not found`);
         }
@@ -111,13 +111,17 @@ async function updateOrder(req, res) {
         return res.status(404).json('Order is not found');
     }
 
+    if (customer && customer !== existingOrder.customer) {
+        return res.status(400).json(`Customer can not be changed`);
+    }
+
     if (business && business !== existingOrder.business) {
-        const existingBusiness = await Business.findOne({ name: business });
+        const existingBusiness = await Business.findById(business);
         if (!existingBusiness) {
             return res.status(404).json(`Business is not found`);
         }
 
-        const previousBusiness = await Business.findOne({ name: existingOrder.business });
+        const previousBusiness = await Business.findById(existingOrder.business);
         if (previousBusiness) {
             previousBusiness.orders.pull(existingOrder._id);
             await previousBusiness.save();
@@ -126,7 +130,7 @@ async function updateOrder(req, res) {
         existingBusiness.orders.addToSet(existingOrder._id);
         await existingBusiness.save();
     } else if (!business) {
-        const previousBusiness = await Business.findOne({ name: existingOrder.business });
+        const previousBusiness = await Business.findById(existingOrder.business);
         if (previousBusiness) {
             previousBusiness.orders.pull(existingOrder._id);
             await previousBusiness.save();
@@ -134,12 +138,12 @@ async function updateOrder(req, res) {
     }
 
     if (category && category !== existingOrder.category) {
-        const existingCategory = await Category.findOne({ name: category });
+        const existingCategory = await Category.findById(category);
         if (!existingCategory) {
             return res.status(404).json(`Category is not found`);
         }
 
-        const previousCategory = await Category.findOne({ name: existingOrder.category });
+        const previousCategory = await Category.findById(existingOrder.category);
         if (previousCategory) {
             previousCategory.orders.pull(existingOrder._id);
             await previousCategory.save();
@@ -168,15 +172,15 @@ async function deleteOrderById(req, res) {
     }
 
     await Customer.updateMany(
-        { name: { $in: deletedOrder.customer } },
+        { id: { $in: deletedOrder.customer } },
         { $pull: { orders: deletedOrder._id } }
     )
     await Business.updateMany(
-        { name: { $in: deletedOrder.business } },
+        { id: { $in: deletedOrder.business } },
         { $pull: { orders: deletedOrder._id } }
     )
     await Category.updateMany(
-        { name: { $in: deletedOrder.category } },
+        { id: { $in: deletedOrder.category } },
         { $pull: { orders: deletedOrder._id } }
     )
     return res.json(deletedOrder);

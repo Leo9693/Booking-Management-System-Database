@@ -10,10 +10,9 @@ const schema = new mongoose.Schema({
     //     lowercase: true
     // },
     customer: {
-        type: String,
+        type: mongoose.Schema.Types.ObjectId,
         ref: 'Customer',
         required: true,
-        lowercase: true
     },
 
     // use businessName instead of the id of business as businessEmail is also unique.
@@ -23,17 +22,15 @@ const schema = new mongoose.Schema({
     //     lowercase: true
     // },
     business: {
-        type: String,
+        type: mongoose.Schema.Types.ObjectId,
         ref: 'Business',
-        lowercase: true
     },
 
     // use categoryName instead of the id of category as categoryName is also unique.
     category: {
-        type: String,
+        type: mongoose.Schema.Types.ObjectId,
         ref: 'Category',
         required: true,
-        lowercase: true
     },
     status: {
         type: String,

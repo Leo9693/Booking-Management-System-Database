@@ -40,10 +40,6 @@ const schema = new mongoose.Schema({
         type: String,
         required: true
     },
-    state: {
-        type: String,
-        enum: ['NSW', 'VIC', 'QLD', 'WA', 'TAS', 'SA', 'ACT', 'NT'],
-    },
     rate: {
         type: Number,
     },

@@ -53,7 +53,7 @@ async function getBusinessById(req, res) {
 }
 
 async function addBusiness(req, res) {
-    const { name, ABN, email, phone, streetAddress, postcode, state, rate } = req.body;
+    const { name, ABN, email, phone, streetAddress, postcode, rate } = req.body;
     const existingEmail = await Business.findOne({ email });
     if (existingEmail) {
         return res.status(400).json('Email has already existed');
@@ -65,7 +65,6 @@ async function addBusiness(req, res) {
         phone,
         streetAddress,
         postcode,
-        state,
         rate
     })
     if (!business) {
@@ -78,9 +77,9 @@ async function addBusiness(req, res) {
 
 async function updateBusiness(req, res) {
     const { id } = req.params;
-    const { name, ABN, email, phone, streetAddress, postcode, state, rate } = req.body;
+    const { name, ABN, email, phone, streetAddress, postcode, rate } = req.body;
     const updatedBusiness = await Business.findByIdAndUpdate(id,
-        { name, ABN, email, phone, streetAddress, postcode, state, rate },
+        { name, ABN, email, phone, streetAddress, postcode, rate },
         { runValidators: true, new: true });
     if (!updatedBusiness) {
         return res.status(404).json('Updating business failed');
