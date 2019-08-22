@@ -171,18 +171,18 @@ async function deleteOrderById(req, res) {
         return res.status(404).json('deleting order failed');
     }
 
-    await Customer.updateMany(
-        { id: { $in: deletedOrder.customer } },
-        { $pull: { orders: deletedOrder._id } }
-    )
-    await Business.updateMany(
-        { id: { $in: deletedOrder.business } },
-        { $pull: { orders: deletedOrder._id } }
-    )
-    await Category.updateMany(
-        { id: { $in: deletedOrder.category } },
-        { $pull: { orders: deletedOrder._id } }
-    )
+    const existingCustomer = await Customer.findById(deletedOrder.customer);
+    existingCustomer.orders.pull(id);
+    await existingCustomer.save();
+
+    const existingBusiness = await Business.findById(deletedOrder.business);
+    existingBusiness.orders.pull(id);
+    await existingBusiness.save();
+
+    const existingCategory = await Category.findById(deletedOrder.category);
+    existingCategory.orders.pull(id);
+    await existingCategory.save();
+
     return res.json(deletedOrder);
 }
 
