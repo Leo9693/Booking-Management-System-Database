@@ -2,13 +2,13 @@ const mongoose = require('mongoose');
 const { DEFAULT_SEARCH_FIELD } = require('../utils/constants');
 
 const schema = new mongoose.Schema({
-    // use customerEmail instead of the id of customer as customerEmail is also unique.
-    customerEmail: {
-        type: String,
-        ref: 'Customer',
-        required: true,
-        lowercase: true
-    },
+    // use customerName instead of the id of customer as customerEmail is also unique.
+    // customerEmail: {
+    //     type: String,
+    //     ref: 'Customer',
+    //     required: true,
+    //     lowercase: true
+    // },
     customerName: {
         type: String,
         ref: 'Customer',
@@ -16,16 +16,15 @@ const schema = new mongoose.Schema({
         lowercase: true
     },
 
-    // use businessEmail instead of the id of business as businessEmail is also unique.
-    businessEmail: {
-        type: String,
-        ref: 'Business',
-        lowercase: true
-    },
+    // use businessName instead of the id of business as businessEmail is also unique.
+    // businessEmail: {
+    //     type: String,
+    //     ref: 'Business',
+    //     lowercase: true
+    // },
     businessName: {
         type: String,
         ref: 'Business',
-        required: true,
         lowercase: true
     },
 
@@ -40,10 +39,10 @@ const schema = new mongoose.Schema({
         type: String,
         required: true,
         enum: ['ongoing', 'finished'],
-        default:'ongoing'
+        default: 'ongoing'
     },
     jobEstimatedTime: {
-        type:Date,
+        type: Date,
     },
     jobLocation: {
         type: String,
@@ -52,8 +51,8 @@ const schema = new mongoose.Schema({
         required: true,
     },
     rate: {
-        type:Number,      
-        enum:[0, 1, 2, 3, 4, 5],
+        type: Number,
+        enum: [0, 1, 2, 3, 4, 5],
         validate: (rate) => {
             if (rate < 0 || rate > 5) {
                 return false;
@@ -65,12 +64,12 @@ const schema = new mongoose.Schema({
         type: String
     }
 },
-{
-    timestamps: true,
-    toJSON: {
-        virtuals: true
-    }
-});
+    {
+        timestamps: true,
+        toJSON: {
+            virtuals: true
+        }
+    });
 
 schema.statics.searchByFilters = async function (searchField, searchValue, pageRequested, pageSize, sortType, sortValue) {
     if (isNaN(pageSize) || parseInt(pageSize) <= 0) {
@@ -86,10 +85,10 @@ schema.statics.searchByFilters = async function (searchField, searchValue, pageR
     }
 
     let query;
-    if (!searchField || searchField === DEFAULT_SEARCH_FIELD) {    
-        query = this.find(); 
-    } else {  
-        query = this.find({ [searchField]: new RegExp(searchValue, 'i') });       
+    if (!searchField || searchField === DEFAULT_SEARCH_FIELD) {
+        query = this.find();
+    } else {
+        query = this.find({ [searchField]: new RegExp(searchValue, 'i') });
     }
 
     const data = await query.skip((parseInt(pageRequested) - 1) * parseInt(pageSize))
