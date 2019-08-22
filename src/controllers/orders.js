@@ -47,6 +47,9 @@ async function getAllOrders(req, res) {
 async function getOrderById(req, res) {
     const { id } = req.params;
     const order = await Order.findById(id)
+    // .populate('customer', 'email phone')
+    // .populate('business', 'email phone postcode')
+    // .populate('category', 'name')
     if (!order) {
         return res.status(404).json('Order is not found');
     }
@@ -55,14 +58,12 @@ async function getOrderById(req, res) {
 }
 
 async function addOrder(req, res) {
-    const { customerEmail, customerName, businessEmail, businessName, categoryName, status,
+    const { customer, business, category, status,
         jobEstimatedTime, jobLocation, rate, comment } = req.body;
     const order = new Order({
-        customerEmail,
-        customerName,
-        businessEmail,
-        businessName,
-        categoryName,
+        customer,
+        business,
+        category,
         status,
         jobEstimatedTime,
         jobLocation,
@@ -73,18 +74,18 @@ async function addOrder(req, res) {
         return res.status(500).json('Adding order failed');
     }
 
-    const existingCustomer = await Customer.findOne({ email: customerEmail });
+    const existingCustomer = await Customer.findOne({ name: customer });
     if (!existingCustomer) {
         return res.status(404).json(`Customer is not found`);
     }
 
-    const existingCategory = await Category.findOne({ name: categoryName });
+    const existingCategory = await Category.findOne({ name: category });
     if (!existingCategory) {
         return res.status(404).json(`Category is not found`);
     }
 
-    if (businessEmail) {
-        const existingBusiness = await Business.findOne({ email: businessEmail });
+    if (business) {
+        const existingBusiness = await Business.findOne({ name: business });
         if (!existingBusiness) {
             return res.status(404).json(`Business is not found`);
         }
@@ -103,20 +104,20 @@ async function addOrder(req, res) {
 
 async function updateOrder(req, res) {
     const { id } = req.params;
-    const { businessEmail, businessName, categoryName, status,
+    const { customer, business, category, status,
         jobEstimatedTime, jobLocation, rate, comment } = req.body;
     const existingOrder = await Order.findById(id);
     if (!existingOrder) {
         return res.status(404).json('Order is not found');
     }
 
-    if (businessEmail && businessEmail !== existingOrder.businessEmail) {
-        const existingBusiness = await Business.findOne({ email: businessEmail });
+    if (business && business !== existingOrder.business) {
+        const existingBusiness = await Business.findOne({ name: business });
         if (!existingBusiness) {
             return res.status(404).json(`Business is not found`);
         }
 
-        const previousBusiness = await Business.findOne({ email: existingOrder.businessEmail });
+        const previousBusiness = await Business.findOne({ name: existingOrder.business });
         if (previousBusiness) {
             previousBusiness.orders.pull(existingOrder._id);
             await previousBusiness.save();
@@ -124,21 +125,21 @@ async function updateOrder(req, res) {
 
         existingBusiness.orders.addToSet(existingOrder._id);
         await existingBusiness.save();
-    } else if (!businessEmail) {
-        const previousBusiness = await Business.findOne({ email: existingOrder.businessEmail });
+    } else if (!business) {
+        const previousBusiness = await Business.findOne({ name: existingOrder.business });
         if (previousBusiness) {
             previousBusiness.orders.pull(existingOrder._id);
             await previousBusiness.save();
         }
     }
 
-    if (categoryName && categoryName !== existingOrder.categoryName) {
-        const existingCategory = await Category.findOne({ name: categoryName });
+    if (category && category !== existingOrder.category) {
+        const existingCategory = await Category.findOne({ name: category });
         if (!existingCategory) {
             return res.status(404).json(`Category is not found`);
         }
 
-        const previousCategory = await Category.findOne({ name: existingOrder.categoryName });
+        const previousCategory = await Category.findOne({ name: existingOrder.category });
         if (previousCategory) {
             previousCategory.orders.pull(existingOrder._id);
             await previousCategory.save();
@@ -149,7 +150,7 @@ async function updateOrder(req, res) {
     }
 
     const updatedOrder = await Order.findByIdAndUpdate(id,
-        { businessEmail, businessName, categoryName, status, jobEstimatedTime, jobLocation, rate, comment },
+        { business, category, status, jobEstimatedTime, jobLocation, rate, comment },
         { runValidators: true, new: true }
     );
     if (!updatedOrder) {
@@ -167,15 +168,15 @@ async function deleteOrderById(req, res) {
     }
 
     await Customer.updateMany(
-        { email: { $in: deletedOrder.customerEmail } },
+        { name: { $in: deletedOrder.customer } },
         { $pull: { orders: deletedOrder._id } }
     )
     await Business.updateMany(
-        { email: { $in: deletedOrder.businessEmail } },
+        { name: { $in: deletedOrder.business } },
         { $pull: { orders: deletedOrder._id } }
     )
     await Category.updateMany(
-        { name: { $in: deletedOrder.categoryName } },
+        { name: { $in: deletedOrder.category } },
         { $pull: { orders: deletedOrder._id } }
     )
     return res.json(deletedOrder);

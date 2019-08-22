@@ -3,13 +3,13 @@ const { DEFAULT_SEARCH_FIELD } = require('../utils/constants');
 
 const schema = new mongoose.Schema({
     // use customerName instead of the id of customer as customerEmail is also unique.
-    customerEmail: {
-        type: String,
-        ref: 'Customer',
-        required: true,
-        lowercase: true
-    },
-    customerName: {
+    // customerEmail: {
+    //     type: String,
+    //     ref: 'Customer',
+    //     required: true,
+    //     lowercase: true
+    // },
+    customer: {
         type: String,
         ref: 'Customer',
         required: true,
@@ -17,19 +17,19 @@ const schema = new mongoose.Schema({
     },
 
     // use businessName instead of the id of business as businessEmail is also unique.
-    businessEmail: {
-        type: String,
-        ref: 'Business',
-        lowercase: true
-    },
-    businessName: {
+    // businessEmail: {
+    //     type: String,
+    //     ref: 'Business',
+    //     lowercase: true
+    // },
+    business: {
         type: String,
         ref: 'Business',
         lowercase: true
     },
 
     // use categoryName instead of the id of category as categoryName is also unique.
-    categoryName: {
+    category: {
         type: String,
         ref: 'Category',
         required: true,
