@@ -36,7 +36,7 @@ const schema = new mongoose.Schema({
     status: {
         type: String,
         required: true,
-        enum: ['ongoing', 'finished'],
+        enum: ['ongoing', 'finished', 'cancelled '],
         default: 'ongoing'
     },
     jobEstimatedTime: {
